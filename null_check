@@ -1,0 +1,37 @@
+#growth_index null값 확
+
+import json
+import os
+
+data_dir = "your/data/path"  # 데이터 루트 경로 수정
+
+growth_index_keys = ['stem_length', 'leaf_cnt', 'leaf_width', 'leaf_length', 'stem_thick', 'fr_weight']
+null_counts = {k: 0 for k in growth_index_keys}
+
+# 전체 파일 먼저 수집
+all_files = []
+for root, dirs, files in os.walk(data_dir):
+    for fname in files:
+        if fname.endswith('.json'):
+            all_files.append(os.path.join(root, fname))
+
+total = len(all_files)
+print(f"전체 파일 수: {total}개")
+
+for i, fpath in enumerate(all_files):
+    if (i + 1) % 100 == 0:
+        print(f"진행중... {i+1}/{total}")
+    
+    with open(fpath, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    gi = data.get('growth_index', {})
+    for k in growth_index_keys:
+        if gi.get(k) is None:
+            null_counts[k] += 1
+
+print(f"\n완료! 전체 {total}개 파일 분석 결과")
+print("-" * 40)
+for k, v in null_counts.items():
+    pct = v / total * 100
+    print(f"{k:15s}: {v:6d}개 null ({pct:.1f}%)")  
